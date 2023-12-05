@@ -41,6 +41,34 @@ app.get("/", (req, res) => {
     }
 });
 
+app.post("/login", (req, res) => {
+    try {
+      const { email, senha } = req.body;
+      
+      client.query(
+        "SELECT * FROM CineUsuarios WHERE email = $1 AND senha = $2",
+        [email, senha],
+        (err, result) => {
+          if (err) {
+            return console.error("Erro ao executar a qry de login", err);
+          }
+  
+          if (result.rows.length > 0) {
+            // Usuário autenticado
+            res.status(200).json({ autenticado: true, usuario: result.rows[0] });
+          } else {
+            // Credenciais inválidas
+            res.status(401).json({ autenticado: false, mensagem: "Credenciais inválidas" });
+          }
+        }
+      );
+    } catch (error) {
+      console.log(error);
+      res.status(500).json({ autenticado: false, mensagem: "Erro no servidor" });
+    }
+  });
+
+  
 app.get("/CineUsuarios/:id_CineUsuario", (req, res) => {
     try {
         console.log("Rota: CineUsuarios/" + req.params.id_CineUsuario);
